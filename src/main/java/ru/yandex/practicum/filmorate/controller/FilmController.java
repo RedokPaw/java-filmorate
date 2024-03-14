@@ -44,13 +44,14 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Реквест на обновление фильма");
         if (films.containsKey(film.getId())) {
-            films.replace(film.getId(),film);
+            films.replace(film.getId(), film);
             log.info("Фильм обновлен!");
             return film;
         }
         log.info("Ошибка при обновлении фильма: нет такого фильма в списке");
         throw new NoSuchElementException();
     }
+
     private boolean isReleaseDateCorrect(LocalDate releaseDate) {
         return !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
     }
