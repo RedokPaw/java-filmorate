@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 public class UserTest {
-    static Validator validator;
+    private static Validator validator;
 
     @BeforeAll
     public static void setupValidatorInstance() {
@@ -28,7 +28,5 @@ public class UserTest {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         Assertions.assertEquals(violations.size(), 3);
-
     }
-
 }
