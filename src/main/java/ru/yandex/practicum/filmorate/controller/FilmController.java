@@ -25,30 +25,31 @@ public class FilmController {
     }
 
     @PostMapping(value = "/films")
-    public Film createNewFilm(@Valid @RequestBody Film film) throws CreationException, ValidationException {
-        log.info("Реквест на создание фильма");
+    public Film createNewFilm(@Valid @RequestBody Film film) {
+        log.info("Реквест на создание фильма c id: " + film.getId());
         if (films.containsKey(film.getId())) {
-            log.info("Такой фильм уже существует");
-            throw new CreationException("Ошибка добавления существующего фильма");
+            log.info("Фильм с id " + film.getId() + " уже существует");
+            throw new CreationException("Ошибка добавления существующего фильма с id: " + film.getId());
         }
         if (!isReleaseDateCorrect(film.getReleaseDate())) {
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года!");
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года! " +
+                    "(film id: " + film.getId() + ")");
         }
         film.setId(generateId());
         films.put(film.getId(), film);
-        log.info("Фильм создан!");
+        log.info("Фильм с id " + film.getId() + " создан!");
         return film;
     }
 
     @PutMapping(value = "/films")
     public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Реквест на обновление фильма");
+        log.info("Реквест на обновление фильма c id: " + film.getId());
         if (films.containsKey(film.getId())) {
             films.replace(film.getId(), film);
-            log.info("Фильм обновлен!");
+            log.info("Фильм с id " + film.getId() + " обновлен!");
             return film;
         }
-        log.info("Ошибка при обновлении фильма: нет такого фильма в списке");
+        log.info("Ошибка при обновлении фильма с id " + film.getId() + ": нет такого фильма в списке");
         throw new NoSuchElementException();
     }
 

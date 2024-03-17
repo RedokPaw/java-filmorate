@@ -10,7 +10,7 @@ import javax.validation.Validator;
 import java.util.Set;
 
 public class FilmTest {
-    static Validator validator;
+    private static Validator validator;
 
     @BeforeAll
     public static void setupValidatorInstance() {
@@ -19,7 +19,6 @@ public class FilmTest {
 
     @Test
     public void testNameMustNotBeBlankAndDurationMustBePositive() {
-
         Film film = Film.builder()
                 .name(" ")
                 .duration(-1)

@@ -23,26 +23,29 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public User createNewUser(@Valid @RequestBody User user) throws CreationException {
+    public User createNewUser(@Valid @RequestBody User user) {
+        log.info("Реквест на создание пользователя с id: " + user.getId());
         if (user.getId() != null) {
             throw new CreationException("ID должен быть null");
         }
         replaceNameWithLogin(user);
         user.setId(generateId());
         users.put(user.getId(), user);
+        log.info("Пользователь с id " + user.getId() + " создан");
         return user;
     }
 
     @PutMapping(value = "/users")
-    public User updateUser(@Valid @RequestBody User user) throws UpdateException {
+    public User updateUser(@Valid @RequestBody User user) {
+        log.info("Реквест на обновление пользователя с id: " + user.getId());
         if (users.containsKey(user.getId())) {
             replaceNameWithLogin(user);
             users.replace(user.getId(), user);
-            log.info("Пользователь обновлен!");
+            log.info("Пользователь с id " + user.getId() + " обновлен!");
             return user;
         }
-        log.info("Ошибка при обновлении пользователя: нет такого пользователя");
-        throw new UpdateException("User update exception");
+        log.info("Ошибка при обновлении пользователя (id: " + user.getId() + "): нет такого пользователя");
+        throw new UpdateException("User " + user.getId() + " update exception");
     }
 
     private void replaceNameWithLogin(User user) {
