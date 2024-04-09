@@ -20,11 +20,10 @@ public class UserTest {
 
     @Test
     public void userEmailMustBeWellFormedAndBirthdayMustBeInPastAndLoginMustNotBeBlank() {
-        User user = User.builder()
-                .email("adasda.ru")
-                .birthday(LocalDate.of(2044, 1, 1))
-                .login("")
-                .build();
+        User user = new User();
+        user.setEmail("adasda.ru");
+        user.setBirthday(LocalDate.of(2044, 1, 1));
+        user.setLogin("");
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         Assertions.assertEquals(violations.size(), 3);

@@ -19,10 +19,9 @@ public class FilmTest {
 
     @Test
     public void testNameMustNotBeBlankAndDurationMustBePositive() {
-        Film film = Film.builder()
-                .name(" ")
-                .duration(-1)
-                .build();
+        Film film = new Film();
+        film.setName(" ");
+        film.setDuration(-1);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         Assertions.assertEquals(violations.size(), 2);
