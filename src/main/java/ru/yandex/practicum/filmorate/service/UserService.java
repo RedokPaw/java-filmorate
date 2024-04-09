@@ -20,9 +20,9 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User addFriend(int userId, int FriendId) {
+    public User addFriend(int userId, int friendId) {
         User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(FriendId);
+        User friend = userStorage.getUserById(friendId);
         if (user == null || friend == null) {
             log.info("add friend error: user or friend is not found!");
             throw new ElementIsNullException("User is null");
@@ -35,9 +35,9 @@ public class UserService {
         return friend;
     }
 
-    public User deleteFriend(int userId, int FriendId) {
+    public User deleteFriend(int userId, int friendId) {
         User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(FriendId);
+        User friend = userStorage.getUserById(friendId);
         if (user == null || friend == null) {
             log.info("add friend error: user or friend is not found!");
             throw new ElementIsNullException("User is null");
@@ -61,9 +61,9 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getListOfCommonFriends(int userId, int FriendId) {
+    public List<User> getListOfCommonFriends(int userId, int friendId) {
         User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(FriendId);
+        User friend = userStorage.getUserById(friendId);
         if (user == null || friend == null) {
             log.info("add friend error: user or friend is not found!");
             throw new ElementIsNullException("User is null");
