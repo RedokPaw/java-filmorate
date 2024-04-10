@@ -2,12 +2,8 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.CreationException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateException;
-import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +16,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            log.info("Фильм с id " + film.getId() + " уже существует");
-            throw new CreationException("Ошибка добавления существующего фильма с id: " + film.getId());
-        }
-        if (!isReleaseDateCorrect(film.getReleaseDate())) {
-            throw new ValidateException("Дата релиза не может быть раньше 28 декабря 1895 года! " +
-                    "(film id: " + film.getId() + ")");
-        }
         film.setId(generateId());
         films.put(film.getId(), film);
         log.info("Фильм с id " + film.getId() + " создан!");
@@ -36,32 +24,26 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film deleteFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            log.info("Фильм с id " + film.getId() + " удалён!");
-            return films.remove(film.getId());
-        }
-        log.info("Фильм с id " + film.getId() + " не был найден!");
-        return film;
+        log.info("Фильм с id " + film.getId() + " удалён!");
+        return films.remove(film.getId());
     }
 
     @Override
     public Film getFilmById(int id) {
+        log.info("Фильм с id " + id + " получен!");
         return films.get(id);
     }
 
     @Override
     public Film updateFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            films.replace(film.getId(), film);
-            log.info("Фильм с id " + film.getId() + " обновлен!");
-            return film;
-        }
-        log.info("Ошибка при обновлении фильма с id " + film.getId() + ": нет такого фильма в списке");
-        throw new UpdateException("Ошибка при обновлении фильма с id" + film.getId());
+        log.info("Фильм с id " + film.getId() + " обновлен!");
+        films.replace(film.getId(), film);
+        return film;
     }
 
     @Override
     public List<Film> getFilms() {
+        log.info("Получен список фильмов!");
         return new ArrayList<>(films.values());
     }
 
@@ -69,7 +51,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++this.id;
     }
 
-    private boolean isReleaseDateCorrect(LocalDate releaseDate) {
-        return !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
-    }
 }

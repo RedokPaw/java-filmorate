@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import javax.validation.ValidationException;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,22 +27,14 @@ public class UserController {
     }
 
     @PostMapping
-    public User createNewUser(@Validated @RequestBody User user, BindingResult errors) {
+    public User createNewUser(@Valid @RequestBody User user) {
         log.info("Реквест на создание нового пользователя");
-        if (errors.hasErrors()) {
-            log.info("Ошибка валидации входных данных!");
-            throw new ValidationException("Ошибка валидации входных данных!");
-        }
         return userService.addUser(user);
     }
 
     @PutMapping
-    public User updateUser(@Validated @RequestBody User user, BindingResult errors) {
+    public User updateUser(@Valid @RequestBody User user) {
         log.info("Реквест на обновление пользователя с id " + user.getId());
-        if (errors.hasErrors()) {
-            log.info("Ошибка валидации входных данных!");
-            throw new ValidationException("Ошибка валидации входных данных!");
-        }
         return userService.updateUser(user);
     }
 

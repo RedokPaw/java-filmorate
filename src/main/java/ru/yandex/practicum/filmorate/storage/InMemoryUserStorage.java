@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.CreationException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -18,9 +16,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        if (user.getId() != null) {
-            throw new CreationException("ID должен быть null");
-        }
         replaceNameWithLogin(user);
         user.setId(generateId());
         users.put(user.getId(), user);
@@ -30,33 +25,27 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User deleteUser(User user) {
-        if (users.containsKey(user.getId())) {
-            log.info("Пользователь с id " + user.getId() + " удалён!");
-            return users.remove(user.getId());
-        }
-        log.info("Пользователь с id " + user.getId() + " не был найден!");
-        return user;
+        log.info("Пользователь с id " + user.getId() + " удалён!");
+        return users.remove(user.getId());
     }
 
     @Override
     public User getUserById(int id) {
+        log.info("Получен пользователь с id: " + id);
         return users.get(id);
     }
 
     @Override
     public User updateUser(User user) {
-        if (users.containsKey(user.getId())) {
-            replaceNameWithLogin(user);
-            users.replace(user.getId(), user);
-            log.info("Пользователь с id " + user.getId() + " обновлен!");
-            return user;
-        }
-        log.info("Ошибка при обновлении пользователя (id: " + user.getId() + "): нет такого пользователя");
-        throw new UpdateException("User " + user.getId() + " update exception");
+        replaceNameWithLogin(user);
+        users.replace(user.getId(), user);
+        log.info("Пользователь с id " + user.getId() + " обновлен!");
+        return user;
     }
 
     @Override
     public List<User> getUsers() {
+        log.info("Получен список пользователей!");
         return new ArrayList<>(users.values());
     }
 

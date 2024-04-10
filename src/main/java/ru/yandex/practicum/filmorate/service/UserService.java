@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.CreationException;
+import ru.yandex.practicum.filmorate.exceptions.DeleteException;
 import ru.yandex.practicum.filmorate.exceptions.ElementIsNullException;
+import ru.yandex.practicum.filmorate.exceptions.UpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -32,6 +35,7 @@ public class UserService {
             return friend;
         }
         friend.getFriends().add(user.getId());
+        log.info("У пользователя с id: " + userId + " добавлен друг с id: " + friendId);
         return friend;
     }
 
@@ -47,6 +51,7 @@ public class UserService {
             return friend;
         }
         friend.getFriends().remove(user.getId());
+        log.info("У пользователя с id: " + userId + " удалён друг с id: " + friendId);
         return friend;
     }
 
@@ -56,6 +61,7 @@ public class UserService {
             log.info("get list of friends error: user is not found!");
             throw new ElementIsNullException("User is null");
         }
+        log.info("Получен список друзей пользователя: " + userId);
         return user.getFriends().stream()
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
@@ -73,14 +79,22 @@ public class UserService {
                 .filter(friend.getFriends()::contains)
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
+        log.info("Получен список общих друзей пользователя: " + userId + " с пользователем: " + friendId);
         return result;
     }
 
     public User addUser(User user) {
+        if (user.getId() != null) {
+            throw new CreationException("ID должен быть null");
+        }
         return userStorage.addUser(user);
     }
 
     public User deleteUser(User user) {
+        if (userStorage.getUserById(user.getId()) == null) {
+            log.info("Пользователь с id " + user.getId() + " не был найден!");
+            throw new DeleteException("Пользователь с id " + user.getId() + " не был удалён, проверьте id");
+        }
         return userStorage.deleteUser(user);
     }
 
@@ -89,6 +103,10 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        if (userStorage.getUserById(user.getId()) == null) {
+            log.info("Ошибка при обновлении пользователя (id: " + user.getId() + "): нет такого пользователя");
+            throw new UpdateException("User " + user.getId() + " update exception");
+        }
         return userStorage.updateUser(user);
     }
 
