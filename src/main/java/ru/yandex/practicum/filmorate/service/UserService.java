@@ -34,6 +34,7 @@ public class UserService {
             log.info("Friend already exists!");
             return friend;
         }
+        friend.getFriends().add(user.getId());
         log.info("У пользователя с id: " + userId + " добавлен друг с id: " + friendId);
         return friend;
     }
@@ -49,6 +50,7 @@ public class UserService {
             log.info("Friend is not exists!");
             return friend;
         }
+        friend.getFriends().remove(user.getId());
         log.info("У пользователя с id: " + userId + " удалён друг с id: " + friendId);
         return friend;
     }
