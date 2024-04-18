@@ -1,60 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.CreationException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
+@RequestMapping(value = "/users")
 @Slf4j
 public class UserController {
-    private Integer id = 0;
-    private HashMap<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
-    @GetMapping(value = "/users")
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
     public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+        log.info("Реквест на получение списка всех пользователей");
+        return userService.getUsers();
     }
 
-    @PostMapping(value = "/users")
+    @PostMapping
     public User createNewUser(@Valid @RequestBody User user) {
-        log.info("Реквест на создание пользователя с id: " + user.getId());
-        if (user.getId() != null) {
-            throw new CreationException("ID должен быть null");
-        }
-        replaceNameWithLogin(user);
-        user.setId(generateId());
-        users.put(user.getId(), user);
-        log.info("Пользователь с id " + user.getId() + " создан");
-        return user;
+        log.info("Реквест на создание нового пользователя");
+        return userService.addUser(user);
     }
 
-    @PutMapping(value = "/users")
+    @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Реквест на обновление пользователя с id: " + user.getId());
-        if (users.containsKey(user.getId())) {
-            replaceNameWithLogin(user);
-            users.replace(user.getId(), user);
-            log.info("Пользователь с id " + user.getId() + " обновлен!");
-            return user;
-        }
-        log.info("Ошибка при обновлении пользователя (id: " + user.getId() + "): нет такого пользователя");
-        throw new UpdateException("User " + user.getId() + " update exception");
+        log.info("Реквест на обновление пользователя с id " + user.getId());
+        return userService.updateUser(user);
     }
 
-    private void replaceNameWithLogin(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable(value = "id") int userId, @PathVariable int friendId) {
+        log.info("Реквест на добавление в друзья пользователя от id: " + userId + " к пользователю с id: " + friendId);
+        return userService.addFriend(userId, friendId);
     }
 
-    private Integer generateId() {
-        return ++this.id;
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
+    public User deleteFriend(@PathVariable(value = "id") int userId, @PathVariable int friendId) {
+        log.info("Реквест на удаления из друзей пользователя от id: " + userId + " пользователя с id: " + friendId);
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping(value = "/{id}/friends")
+    public List<User> getListOfFriends(@PathVariable(value = "id") int userId) {
+        log.info("Реквест на получение списка друзей пользователя с id: " + userId);
+        return userService.getListOfFriends(userId);
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{otherId}")
+    public List<User> getListOfCommonFriends(@PathVariable(value = "id") int userId, @PathVariable(value = "otherId")
+    int friendId) {
+        log.info("Реквест на получение списка общиих друзей пользователя с id: " + userId + " с пользователем с id: " +
+                friendId);
+        return userService.getListOfCommonFriends(userId, friendId);
     }
 }
