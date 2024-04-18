@@ -53,7 +53,7 @@ public class FilmService {
     }
 
     public List<Film> getMostLikedFilms(int maxSize) {
-        return filmStorage.getFilms().stream()
+        return filmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparingInt(o -> ((Film) o).getLikes().size()).reversed())
                 .limit(maxSize)
                 .collect(Collectors.toList());
@@ -79,7 +79,7 @@ public class FilmService {
             log.info("Фильм с id " + film.getId() + " не был найден!");
             throw new DeleteException("Ошибка удаления фильма с id: " + film.getId() + " фильм не был найден!");
         }
-        return filmStorage.deleteFilm(film);
+        return filmStorage.deleteFilmById(film.getId());
     }
 
     public Film getFilmById(int id) {
@@ -95,7 +95,7 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmStorage.getAllFilms();
     }
 
     private boolean isReleaseDateCorrect(LocalDate releaseDate) {

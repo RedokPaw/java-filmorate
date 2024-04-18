@@ -23,9 +23,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film deleteFilm(Film film) {
-        log.info("Фильм с id " + film.getId() + " удалён!");
-        return films.remove(film.getId());
+    public Film deleteFilmById(int id) {
+        log.info("Фильм с id " + id + " удалён!");
+        return films.remove(id);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilms() {
+    public List<Film> getAllFilms() {
         log.info("Получен список фильмов!");
         return new ArrayList<>(films.values());
     }

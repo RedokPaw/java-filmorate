@@ -34,7 +34,6 @@ public class UserService {
             log.info("Friend already exists!");
             return friend;
         }
-        friend.getFriends().add(user.getId());
         log.info("У пользователя с id: " + userId + " добавлен друг с id: " + friendId);
         return friend;
     }
@@ -43,14 +42,13 @@ public class UserService {
         User user = userStorage.getUserById(userId);
         User friend = userStorage.getUserById(friendId);
         if (user == null || friend == null) {
-            log.info("add friend error: user or friend is not found!");
+            log.info("delete friend error: user or friend is not found!");
             throw new ElementIsNullException("User is null");
         }
         if (!user.getFriends().remove(friend.getId())) {
             log.info("Friend is not exists!");
             return friend;
         }
-        friend.getFriends().remove(user.getId());
         log.info("У пользователя с id: " + userId + " удалён друг с id: " + friendId);
         return friend;
     }
@@ -90,12 +88,13 @@ public class UserService {
         return userStorage.addUser(user);
     }
 
-    public User deleteUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
-            log.info("Пользователь с id " + user.getId() + " не был найден!");
-            throw new DeleteException("Пользователь с id " + user.getId() + " не был удалён, проверьте id");
+    public User deleteUserById(int id) {
+        User deletedUser = userStorage.deleteUserById(id);
+        if (deletedUser == null) {
+            log.info("Пользователь с id " + id + " не был найден!");
+            throw new DeleteException("Пользователь с id " + id + " не был удалён, проверьте id");
         }
-        return userStorage.deleteUser(user);
+        return deletedUser;
     }
 
     public User getUserById(int id) {
