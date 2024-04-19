@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exceptions.CreationException;
-import ru.yandex.practicum.filmorate.exceptions.ElementIsNullException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateException;
-import ru.yandex.practicum.filmorate.exceptions.ValidateException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 import javax.validation.ValidationException;
@@ -37,10 +35,17 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUpdateException(final UpdateException e) {
         log.error("Update exception, check data");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEmptyResultDataAccessException(final EmptyResultDataAccessException e) {
+        log.error("Empty result exception, check data");
         return new ErrorResponse(e.getMessage());
     }
 
@@ -48,6 +53,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleElementIsNullException(final ElementIsNullException e) {
         log.error("Element is null exception exception, check data");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserIsNullException(final UserIsNullException e) {
+        log.error("User is null exception exception, check data");
         return new ErrorResponse(e.getMessage());
     }
 }
