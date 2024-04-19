@@ -14,7 +14,7 @@ SELECT *
 FROM user;
 ```
 
--Получение списка фильмов:
+- Получение списка фильмов:
 ```roomsql
 SELECT *
 FROM movie;
