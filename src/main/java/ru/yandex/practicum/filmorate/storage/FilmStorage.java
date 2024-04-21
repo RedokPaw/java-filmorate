@@ -34,6 +34,6 @@ public interface FilmStorage {
 
     boolean putGenreIdAndFilmId(int filmId, int genreId);
 
-    Set<Integer> getAllGenresByFilmId(int filmId);
+    Set<Genre> getAllGenresByFilmId(int filmId);
 
 }

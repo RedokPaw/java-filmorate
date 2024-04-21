@@ -1,7 +1,7 @@
 create table IF NOT EXISTS GENRE
 (
     ID   INTEGER auto_increment,
-    NAME CHARACTER VARYING,
+    NAME VARCHAR(255),
     constraint GENRE_PK
         primary key (ID)
 );
@@ -9,7 +9,7 @@ create table IF NOT EXISTS GENRE
 create table IF NOT EXISTS MPA
 (
     ID   INTEGER auto_increment,
-    NAME CHARACTER VARYING,
+    NAME VARCHAR(255),
     constraint MPA_PK
         primary key (ID)
 );
@@ -18,7 +18,7 @@ create table IF NOT EXISTS FILM
 (
     ID           INTEGER auto_increment,
     MPA_ID       INTEGER,
-    DESCRIPTION  CHARACTER VARYING,
+    DESCRIPTION  VARCHAR(2000),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     NAME         CHARACTER VARYING not null,
@@ -45,9 +45,9 @@ create table IF NOT EXISTS USER
 (
     ID       INTEGER auto_increment,
     BIRTHDAY DATE,
-    NAME     CHARACTER VARYING,
-    LOGIN    CHARACTER VARYING not null,
-    EMAIL    CHARACTER VARYING not null,
+    NAME     VARCHAR(255),
+    LOGIN    VARCHAR(128) not null,
+    EMAIL    VARCHAR(128) not null,
     constraint USER_PK
         primary key (ID)
 );

@@ -89,7 +89,6 @@ public class FilmService {
         genreAndMpaValidation(film);
         film.getGenres().clear();
         film.setGenres(getAllGenresByFilmId(id));
-        System.out.println(film);
         return film;
     }
 
@@ -114,9 +113,7 @@ public class FilmService {
     }
 
     public Set<Genre> getAllGenresByFilmId(int filmId) {
-        return filmStorage.getAllGenresByFilmId(filmId).stream()
-                .map(this::getGenreById)
-                .collect(Collectors.toSet());
+        return filmStorage.getAllGenresByFilmId(filmId);
     }
 
     public FilmMpa getMpaById(int id) {
@@ -151,8 +148,13 @@ public class FilmService {
         }
         if (film.getGenres() != null) {
             try {
+                Set<Genre> genres = getAllGenres().stream()
+                        .peek(genre -> genre.setName(null))
+                        .collect(Collectors.toSet());
                 for (Genre genre : film.getGenres()) {
-                    getGenreById(genre.getId());
+                    if (!genres.contains(genre)) {
+                        throw new ValidateException("Genre with id " + genre.getId() + " does not exists");
+                    }
                 }
             } catch (EmptyResultDataAccessException e) {
                 throw new ValidateException("Genre validate exception, check if genre exists");

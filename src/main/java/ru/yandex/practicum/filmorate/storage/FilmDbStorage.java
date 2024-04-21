@@ -118,13 +118,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Set<Integer> getAllGenresByFilmId(int filmId) {
-        Set<Integer> result = new HashSet<>();
-        String sqlQuery = "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?;";
-        jdbcTemplate.query(sqlQuery, rs -> {
-            result.add(rs.getInt("genre_id"));
-        }, filmId);
-        return result;
+    public Set<Genre> getAllGenresByFilmId(int filmId) {
+        String sqlQuery = "SELECT fg.GENRE_ID AS id, g.NAME AS name \n " +
+                "FROM FILM_GENRE AS fg\n" +
+                "INNER JOIN GENRE AS g ON fg.GENRE_ID  = g.ID\n" +
+                "WHERE fg.FILM_ID = ?\n" +
+                "ORDER BY fg.GENRE_ID;";
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId));
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
