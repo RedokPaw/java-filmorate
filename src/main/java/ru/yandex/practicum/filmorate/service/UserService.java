@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.CreationException;
 import ru.yandex.practicum.filmorate.exceptions.DeleteException;
-import ru.yandex.practicum.filmorate.exceptions.ElementIsNullException;
 import ru.yandex.practicum.filmorate.exceptions.UpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -24,60 +23,30 @@ public class UserService {
     }
 
     public User addFriend(int userId, int friendId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        if (user == null || friend == null) {
-            log.info("add friend error: user or friend is not found!");
-            throw new ElementIsNullException("User is null");
+        if (userStorage.getUserById(userId) == null || userStorage.getUserById(friendId) == null) {
+            throw new CreationException("User not found, check data");
         }
-        if (!user.getFriends().add(friend.getId())) {
-            log.info("Friend already exists!");
-            return friend;
-        }
-        friend.getFriends().add(user.getId());
         log.info("У пользователя с id: " + userId + " добавлен друг с id: " + friendId);
-        return friend;
+        return userStorage.addToFriends(userId, friendId);
     }
 
     public User deleteFriend(int userId, int friendId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        if (user == null || friend == null) {
-            log.info("delete friend error: user or friend is not found!");
-            throw new ElementIsNullException("User is null");
-        }
-        if (!user.getFriends().remove(friend.getId())) {
-            log.info("Friend is not exists!");
-            return friend;
-        }
-        friend.getFriends().remove(user.getId());
         log.info("У пользователя с id: " + userId + " удалён друг с id: " + friendId);
-        return friend;
+        return userStorage.removeFriendById(userId, friendId);
     }
 
     public List<User> getListOfFriends(int userId) {
-        User user = userStorage.getUserById(userId);
-        if (user == null) {
-            log.info("get list of friends error: user is not found!");
-            throw new ElementIsNullException("User is null");
-        }
+
         log.info("Получен список друзей пользователя: " + userId);
-        return user.getFriends().stream()
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
+        return userStorage.getListOfFriends(userId);
     }
 
     public List<User> getListOfCommonFriends(int userId, int friendId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        if (user == null || friend == null) {
-            log.info("add friend error: user or friend is not found!");
-            throw new ElementIsNullException("User is null");
-        }
-        List<User> result = user.getFriends().stream()
+        List<User> userFriends = userStorage.getListOfFriends(userId);
+        List<User> secondsUserFriends = userStorage.getListOfFriends(friendId);
+        List<User> result = userFriends.stream()
                 .distinct()
-                .filter(friend.getFriends()::contains)
-                .map(userStorage::getUserById)
+                .filter(secondsUserFriends::contains)
                 .collect(Collectors.toList());
         log.info("Получен список общих друзей пользователя: " + userId + " с пользователем: " + friendId);
         return result;
@@ -91,12 +60,12 @@ public class UserService {
     }
 
     public User deleteUserById(int id) {
-        User deletedUser = userStorage.deleteUserById(id);
-        if (deletedUser == null) {
+        User user = userStorage.deleteUserById(id);
+        if (user == null) {
             log.info("Пользователь с id " + id + " не был найден!");
             throw new DeleteException("Пользователь с id " + id + " не был удалён, проверьте id");
         }
-        return deletedUser;
+        return user;
     }
 
     public User getUserById(int id) {
@@ -104,14 +73,15 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
+        User updatedUser = userStorage.updateUser(user);
+        if (updatedUser == null) {
             log.info("Ошибка при обновлении пользователя (id: " + user.getId() + "): нет такого пользователя");
             throw new UpdateException("User " + user.getId() + " update exception");
         }
-        return userStorage.updateUser(user);
+        return updatedUser;
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userStorage.getAllUsers();
     }
 }

@@ -23,7 +23,7 @@ public class FilmController {
     @GetMapping
     public List<Film> getFilms() {
         log.info("Реквест на получение всех фильмов ");
-        return filmService.getFilms();
+        return filmService.getAllFilms();
     }
 
     @PostMapping
@@ -38,7 +38,7 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @PutMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     public Film getFilm(@PathVariable Integer id) {
         log.info("Реквест на получение фильма с id: " + id);
         return filmService.getFilmById(id);
@@ -47,7 +47,7 @@ public class FilmController {
     @PutMapping(value = "/{id}/like/{userId}")
     public Film addLike(@PathVariable(value = "id") int filmId, @PathVariable int userId) {
         log.info("Реквест на добавление лайка фильму с id: " + filmId + " от пользователя с id: " + userId);
-        return filmService.addLike(filmId, userId);
+        return filmService.addLike(userId, filmId);
     }
 
     @DeleteMapping(value = "/{id}/like/{userId}")

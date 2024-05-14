@@ -7,12 +7,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
 public class Film {
-    private Set<Integer> likes = new HashSet<>();
     private Integer id;
     @NotNull
     @NotBlank(message = "Name must not be blank")
@@ -21,5 +22,19 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     @Min(value = 1, message = "Duration below zero")
-    private int duration;
+    private Integer duration;
+    private FilmMpa mpa;
+    private Set<Genre> genres = new HashSet<>();
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("ID", id);
+        map.put("NAME", name);
+        map.put("DESCRIPTION", description);
+        map.put("RELEASE_DATE", releaseDate);
+        map.put("DURATION", duration);
+        map.put("MPA_ID", mpa.getId());
+        return map;
+    }
+
 }

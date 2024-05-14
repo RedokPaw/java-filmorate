@@ -2,9 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmMpa;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -12,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,17 +30,14 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public Film addLike(int filmId, int userId) {
+    public Film addLike(int userId, int filmId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
         if (film == null || user == null) {
             log.info("add like to film error: user or film is not found! User= " + user + ", film = " + film);
             throw new ElementIsNullException("Film or user is not found! Check User and Film id");
         }
-        if (!film.getLikes().add(user.getId())) {
-            log.info("Film already has like");
-        }
-        return film;
+        return filmStorage.addLikeToFilm(userId, filmId);
     }
 
     public Film deleteLike(int filmId, int userId) {
@@ -46,15 +47,12 @@ public class FilmService {
             log.info("add like to film error: user or film is not found!");
             throw new ElementIsNullException("Film or user is null");
         }
-        if (!film.getLikes().remove(user.getId())) {
-            log.info("Like is not found");
-        }
-        return film;
+        return filmStorage.removeLikeFromFilm(userId, filmId);
     }
 
     public List<Film> getMostLikedFilms(int maxSize) {
         return filmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt(o -> ((Film) o).getLikes().size()).reversed())
+                .sorted(Comparator.comparingInt(o -> (filmStorage.getAllFilmLikes(((Film) o).getId()).size())).reversed())
                 .limit(maxSize)
                 .collect(Collectors.toList());
     }
@@ -65,7 +63,11 @@ public class FilmService {
                     "(film id: " + film.getId() + ")");
         }
         if (film.getId() == null) {
-            return filmStorage.addFilm(film);
+            genreAndMpaValidation(film);
+            Integer newId = filmStorage.addFilm(film).getId();
+            film.setId(newId);
+            addFilmGenresToDb(film);
+            return film;
         }
         if (!(filmStorage.getFilmById(film.getId()) == null)) {
             log.info("Фильм с id " + film.getId() + " уже существует");
@@ -83,7 +85,11 @@ public class FilmService {
     }
 
     public Film getFilmById(int id) {
-        return filmStorage.getFilmById(id);
+        Film film = filmStorage.getFilmById(id);
+        genreAndMpaValidation(film);
+        film.getGenres().clear();
+        film.setGenres(getAllGenresByFilmId(id));
+        return film;
     }
 
     public Film updateFilm(Film film) {
@@ -94,12 +100,66 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
+    }
+
+    public List<Genre> getAllGenres() {
+        return filmStorage.getAllGenres();
+    }
+
+    public Genre getGenreById(int id) {
+        return filmStorage.getGenreById(id);
+    }
+
+    public Set<Genre> getAllGenresByFilmId(int filmId) {
+        return filmStorage.getAllGenresByFilmId(filmId);
+    }
+
+    public FilmMpa getMpaById(int id) {
+        return filmStorage.getMpaById(id);
+    }
+
+    public List<FilmMpa> getAllMpas() {
+        return filmStorage.getAllMpas();
     }
 
     private boolean isReleaseDateCorrect(LocalDate releaseDate) {
         return !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
+    }
+
+    private void addFilmGenresToDb(Film film) {
+        for (Genre genre : film.getGenres()) {
+            filmStorage.putGenreIdAndFilmId(film.getId(), genre.getId());
+        }
+    }
+
+    private void genreAndMpaValidation(Film film) {
+        if (film.getMpa() != null) {
+            try {
+                FilmMpa mpa = filmStorage.getMpaById(film.getMpa().getId());
+                if (mpa == null) {
+                    throw new ValidateException("Mpa with id " + film.getMpa().getId() + " does not exists");
+                }
+                film.setMpa(mpa);
+            } catch (EmptyResultDataAccessException e) {
+                throw new ValidateException("Mpa with id " + film.getMpa().getId() + " does not exists");
+            }
+        }
+        if (film.getGenres() != null) {
+            try {
+                Set<Genre> genres = getAllGenres().stream()
+                        .peek(genre -> genre.setName(null))
+                        .collect(Collectors.toSet());
+                for (Genre genre : film.getGenres()) {
+                    if (!genres.contains(genre)) {
+                        throw new ValidateException("Genre with id " + genre.getId() + " does not exists");
+                    }
+                }
+            } catch (EmptyResultDataAccessException e) {
+                throw new ValidateException("Genre validate exception, check if genre exists");
+            }
+        }
     }
 }
 
