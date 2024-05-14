@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.UserIsNullException;
+import ru.yandex.practicum.filmorate.exceptions.UserIsNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -68,7 +68,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User removeFriendById(int userId, int friendId) {
         if (getUserById(userId) == null) {
-            throw new UserIsNullException("User " + userId + " is null");
+            throw new UserIsNotFoundException("User " + userId + " is null");
         }
         String sqlQuery = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sqlQuery, userId, friendId);
@@ -78,7 +78,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getListOfFriends(int userId) {
         if (getUserById(userId) == null) {
-            throw new UserIsNullException("User " + userId + " is null");
+            throw new UserIsNotFoundException("User " + userId + " is null");
         }
         List<User> result = new ArrayList<>();
         String sqlQuery = "SELECT friend_id FROM friendships WHERE user_id = ?";

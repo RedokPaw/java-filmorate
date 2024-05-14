@@ -58,7 +58,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserIsNullException(final UserIsNullException e) {
+    public ErrorResponse handleUserIsNullException(final UserIsNotFoundException e) {
         log.error("User is null exception exception, check data");
         return new ErrorResponse(e.getMessage());
     }

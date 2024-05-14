@@ -136,15 +136,11 @@ public class FilmService {
 
     private void genreAndMpaValidation(Film film) {
         if (film.getMpa() != null) {
-            try {
-                FilmMpa mpa = filmStorage.getMpaById(film.getMpa().getId());
-                if (mpa == null) {
-                    throw new ValidateException("Mpa with id " + film.getMpa().getId() + " does not exists");
-                }
-                film.setMpa(mpa);
-            } catch (EmptyResultDataAccessException e) {
+            FilmMpa mpa = filmStorage.getMpaById(film.getMpa().getId());
+            if (mpa == null) {
                 throw new ValidateException("Mpa with id " + film.getMpa().getId() + " does not exists");
             }
+            film.setMpa(mpa);
         }
         if (film.getGenres() != null) {
             try {
